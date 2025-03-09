@@ -1,3 +1,5 @@
-const app = require('./backend/server.js');
+(async () => {
+    const { default: app } = await import('./backend/server.js');
 
-module.exports = app;
+    module.exports = app;
+})();
