@@ -2,10 +2,13 @@ import express from "express";
 import agendamentoRoutes from "./routes/agendamentoRoutes.js";
 import profissionalRoutes from "./routes/profissionalRoutes.js";
 import usuarioRoutes from "./routes/userRoutes.js";
+import dotenv from 'dotenv';
 import cors from 'cors';
 
 
 const app = express();
+
+dotenv.config();
 
 app.use(cors());
 app.use(express.json());
