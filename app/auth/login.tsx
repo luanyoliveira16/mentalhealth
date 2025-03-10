@@ -1,6 +1,5 @@
-// LoginScreen.js
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Header from '../../components/Header';
@@ -8,8 +7,40 @@ import Header from '../../components/Header';
 export default function LoginScreen() {
     const router = useRouter();
 
-    const handleLogin = () => {
-        router.push('(tabs)/home');
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+
+    const handleLogin = async () => {
+        if (!email.trim() || !senha.trim()) {
+            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+            return;
+        }
+
+        try {
+            const response = await fetch('https://mentalhealth-ebon.vercel.app/api/usuarios/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    senha,
+                }),
+            });
+
+            const responseJson = await response.json();
+
+            if (response.ok) {
+                const token = responseJson.token;
+
+                router.push('(tabs)/home');
+            } else {
+                Alert.alert('Erro', responseJson.message || 'Falha ao fazer login');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Erro ao tentar se autenticar');
+            console.error(error);
+        }
     };
 
     const handleRegister = () => {
@@ -29,12 +60,24 @@ export default function LoginScreen() {
 
                 <View style={styles.inputContainer}>
                     <MaterialIcons name="email" size={24} color="gray" style={styles.icon} />
-                    <TextInput placeholder="Email" style={styles.input} keyboardType="email-address" />
+                    <TextInput
+                        placeholder="Email"
+                        style={styles.input}
+                        keyboardType="email-address"
+                        value={email}
+                        onChangeText={setEmail}
+                    />
                 </View>
 
                 <View style={styles.inputContainer}>
                     <MaterialIcons name="lock" size={24} color="gray" style={styles.icon} />
-                    <TextInput placeholder="Senha" style={styles.input} secureTextEntry />
+                    <TextInput
+                        placeholder="Senha"
+                        style={styles.input}
+                        secureTextEntry
+                        value={senha}
+                        onChangeText={setSenha}
+                    />
                 </View>
 
                 <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
