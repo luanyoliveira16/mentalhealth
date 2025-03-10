@@ -1,4 +1,6 @@
 import Usuario from '../models/userModel.js';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 export const createUsuario = async (req, res) => {
     try {
@@ -116,5 +118,83 @@ export const loginUsuario = async (req, res) => {
         });
     } catch (error) {
         return res.status(500).json({ message: 'Erro ao realizar login', error });
+    }
+};
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'mentalhealthcontato@gmail.com',
+        pass: 'taxp dvlx dags kkxi',
+    },
+});
+
+// Função para enviar o e-mail com o token
+const sendEmail = async (email, token) => {
+    const mailOptions = {
+        from: 'mentalhealthcontato@gmail.com',
+        to: email,
+        subject: 'Alteração de Senha',
+        text: `Sua senha foi alterada. Aqui está o token para autenticação: ${token}`,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('E-mail enviado com sucesso!');
+    } catch (error) {
+        console.error('Erro ao enviar o e-mail:', error);
+    }
+};
+export const requestPasswordChange = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const usuario = await Usuario.findOne({ where: { email } });
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuário não encontrado com esse e-mail' });
+        }
+
+        const token = jwt.sign({ id: usuario.id }, 'seu_segredo', { expiresIn: '1h' });
+
+        await sendEmail(usuario.email, token);
+
+        return res.status(200).json({ message: 'Token enviado para o e-mail' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Erro ao enviar o token', error });
+    }
+};
+
+export const verifyTokenAndUpdatePassword = async (req, res) => {
+    const { token, novaSenha } = req.body;
+
+    try {
+        if (!token) {
+            return res.status(400).json({ message: 'Token é obrigatório' });
+        }
+
+        if (!novaSenha) {
+            return res.status(400).json({ message: 'Nova senha é obrigatória' });
+        }
+
+        const decoded = jwt.verify(token, 'seu_segredo');  // Use o mesmo segredo que você usou na geração do token
+        const usuarioId = decoded.id;
+
+        const usuario = await Usuario.findByPk(usuarioId);
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        usuario.senha = novaSenha;
+
+        await usuario.save();
+
+        return res.status(200).json({ message: 'Senha alterada com sucesso' });
+    } catch (error) {
+        if (error instanceof jwt.JsonWebTokenError) {
+            return res.status(400).json({ message: 'Token inválido' });
+        }
+        return res.status(500).json({ message: 'Erro ao alterar a senha', error });
     }
 };

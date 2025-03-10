@@ -5,7 +5,9 @@ import {
     getUsuarioById,
     updateUsuario,
     deleteUsuario,
-    loginUsuario
+    loginUsuario,
+    requestPasswordChange,
+    verifyTokenAndUpdatePassword
 } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -22,5 +24,9 @@ router.put('/:id', updateUsuario);
 router.delete('/:id', deleteUsuario);
 // Realizar login
 router.post('/login', loginUsuario);
+// Recuperar senha por email
+router.post('/request-password-change', requestPasswordChange);
+// Confirmar token e alterar senha
+router.post('/verify-token', verifyTokenAndUpdatePassword);
 
 export default router;
