@@ -181,7 +181,7 @@ export const verifyTokenAndUpdatePassword = async (req, res) => {
             return res.status(400).json({ message: 'Nova senha é obrigatória' });
         }
 
-        const decoded = jwt.verify(token, 'seu_segredo');  // Use o mesmo segredo que você usou na geração do token
+        const decoded = jwt.verify(token, 'seu_segredo');
         const usuarioId = decoded.id;
 
         const usuario = await Usuario.findByPk(usuarioId);

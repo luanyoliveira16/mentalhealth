@@ -287,8 +287,8 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center', // Centraliza o modal na tela
+        alignItems: 'center', // Alinha o conteúdo do modal ao centro
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
