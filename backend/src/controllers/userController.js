@@ -99,6 +99,7 @@ export const loginUsuario = async (req, res) => {
         const { email, senha } = req.body;
 
         const usuario = await Usuario.findOne({ where: { email } });
+
         if (!usuario) {
             return res.status(404).json({ message: 'Usuário não encontrado' });
         }
@@ -107,7 +108,12 @@ export const loginUsuario = async (req, res) => {
             return res.status(400).json({ message: 'Senha inválida' });
         }
 
-        return res.status(200).json({ message: 'Login realizado com sucesso' });
+        return res.status(200).json({
+            message: 'Login realizado com sucesso',
+            userId: usuario.id,
+            name: usuario.name,
+            image: usuario.image
+        });
     } catch (error) {
         return res.status(500).json({ message: 'Erro ao realizar login', error });
     }
