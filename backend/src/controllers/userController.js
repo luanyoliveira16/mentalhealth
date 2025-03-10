@@ -2,17 +2,18 @@ import Usuario from '../models/userModel.js';
 
 export const createUsuario = async (req, res) => {
     try {
-        // Pegando os dados de usuários passados no req.body
         const usuarios = req.body;
 
-        // Verificar se cada usuário tem o campo 'nome'
+        if (!Array.isArray(usuarios)) {
+            return res.status(400).json({ message: "Os dados devem ser um array de usuários" });
+        }
+
         usuarios.forEach(usuario => {
             if (!usuario.nome || usuario.nome.trim() === '') {
                 return res.status(400).json({ message: "O campo 'nome' é obrigatório" });
             }
         });
 
-        // Criar os usuários no banco de dados
         const resultado = await Usuario.bulkCreate(usuarios);
 
         return res.status(201).json({ message: 'Usuários criados com sucesso!', usuarios: resultado });
@@ -21,6 +22,7 @@ export const createUsuario = async (req, res) => {
         return res.status(500).json({ message: "Erro ao criar usuários", error });
     }
 };
+
 
 export const getAllUsuarios = async (req, res) => {
     try {
