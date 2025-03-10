@@ -2,7 +2,7 @@
 
 /**
  * This script is used to reset the project to a blank state.
- * It deletes or moves the /app, /components, /hooks, /scripts, and /constants directories to /app-example based on user input and creates a new /app directory with an index.tsx and _layout.tsx file.
+ * It deletes or moves the /app, /components, /hooks, /scripts, and /constants directories to /app-example based on user input and creates a new /app directory with an login.tsx and _layout.tsx file.
  * You can remove the `reset-project` script from package.json and safely delete this file after running it.
  */
 
@@ -75,10 +75,10 @@ const moveDirectories = async (userInput) => {
     await fs.promises.mkdir(newAppDirPath, { recursive: true });
     console.log("\n📁 New /app directory created.");
 
-    // Create index.tsx
-    const indexPath = path.join(newAppDirPath, "index.tsx");
+    // Create login.tsx
+    const indexPath = path.join(newAppDirPath, "login.tsx");
     await fs.promises.writeFile(indexPath, indexContent);
-    console.log("📄 app/index.tsx created.");
+    console.log("📄 app/auth/login.tsx created.");
 
     // Create _layout.tsx
     const layoutPath = path.join(newAppDirPath, "_layout.tsx");
@@ -87,11 +87,11 @@ const moveDirectories = async (userInput) => {
 
     console.log("\n✅ Project reset complete. Next steps:");
     console.log(
-      `1. Run \`npx expo start\` to start a development server.\n2. Edit app/index.tsx to edit the main screen.${
-        userInput === "y"
-          ? `\n3. Delete the /${exampleDir} directory when you're done referencing it.`
-          : ""
-      }`
+        `1. Run \`npx expo start\` to start a development server.\n2. Edit app/login.tsx to edit the main screen.${
+            userInput === "y"
+                ? `\n3. Delete the /${exampleDir} directory when you're done referencing it.`
+                : ""
+        }`
     );
   } catch (error) {
     console.error(`❌ Error during script execution: ${error.message}`);
@@ -99,14 +99,14 @@ const moveDirectories = async (userInput) => {
 };
 
 rl.question(
-  "Do you want to move existing files to /app-example instead of deleting them? (Y/n): ",
-  (answer) => {
-    const userInput = answer.trim().toLowerCase() || "y";
-    if (userInput === "y" || userInput === "n") {
-      moveDirectories(userInput).finally(() => rl.close());
-    } else {
-      console.log("❌ Invalid input. Please enter 'Y' or 'N'.");
-      rl.close();
+    "Do you want to move existing files to /app-example instead of deleting them? (Y/n): ",
+    (answer) => {
+      const userInput = answer.trim().toLowerCase() || "y";
+      if (userInput === "y" || userInput === "n") {
+        moveDirectories(userInput).finally(() => rl.close());
+      } else {
+        console.log("❌ Invalid input. Please enter 'Y' or 'N'.");
+        rl.close();
+      }
     }
-  }
 );
