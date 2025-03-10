@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_KEY_USUARIOS, API_KEY_FOTOS } from '../../config.json'
 
-export default function UserProfile() {
-    const [name, setName] = useState('João Silva');
-    const [email, setEmail] = useState('joao@exemplo.com');
-    const [password, setPassword] = useState('123456');
-    const [birthdate, setBirthdate] = useState('1990-01-01'); o
-    const [photo, setPhoto] = useState(null);
+const UpdateProfile: React.FC = () => {
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [dataNascimento, setDataNascimento] = useState('');
+    const [foto, setFoto] = useState<string | null>(null);
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -17,27 +19,113 @@ export default function UserProfile() {
             quality: 1,
         });
 
-        if (!result.cancelled) {
-            setPhoto(result.uri);
+        if (!result.canceled) {
+            setFoto(result.assets[0].uri);
         }
     };
 
-    const saveProfile = () => {
-        if (!name || !email || !password || !birthdate) {
-            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+    const formatDate = (date: string) => {
+        const parts = date.split('/');
+        if (parts.length === 3) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return date;
+    };
+
+    const handleDataNascimentoChange = (value: string) => {
+        const formattedValue = value.replace(/[^0-9\/]/g, '').slice(0, 10);
+        if (formattedValue.length === 2 || formattedValue.length === 5) {
+            setDataNascimento(formattedValue + '/');
+        } else {
+            setDataNascimento(formattedValue);
+        }
+    };
+
+    const uploadPhoto = async (userId: string) => {
+        if (!foto) {
             return;
         }
 
-        Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+        try {
+            const formData = new FormData();
+            const localUri = foto;
+            const filename = localUri.split('/').pop();
+            const type = 'image/jpeg';
+
+            formData.append('image', { uri: localUri, name: filename, type });
+
+            const imgbbUrl = API_KEY_FOTOS;
+
+            const imgbbResponse = await fetch(imgbbUrl, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const imgbbJson = await imgbbResponse.json();
+
+            if (imgbbJson.success) {
+                const imageUrl = imgbbJson.data.url;
+                await updateUserWithPhoto(userId, imageUrl);
+            } else {
+                Alert.alert('Erro', 'Erro ao enviar foto para o Imgbb');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Erro ao enviar foto para o Imgbb');
+            console.error(error);
+        }
+    };
+
+    const updateUserWithPhoto = async (userId: string, imageUrl: string) => {
+        try {
+            const response = await fetch(`${API_KEY_USUARIOS}/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Charset': 'utf-8',
+                },
+                body: JSON.stringify({
+                    nome,
+                    email,
+                    senha,
+                    data_nascimento: formatDate(dataNascimento),
+                    foto: imageUrl,
+                }),
+            });
+
+            const responseJson = await response.json();
+
+            if (response.ok) {
+                Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+            } else {
+                Alert.alert('Erro', responseJson.message || 'Erro ao atualizar perfil');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Erro ao atualizar perfil no servidor');
+            console.error(error);
+        }
+    };
+
+    const handleUpdateProfile = async () => {
+        try {
+            const userId = await AsyncStorage.getItem('userId');
+            if (userId) {
+                await uploadPhoto(userId);
+            } else {
+                Alert.alert('Erro', 'Usuário não encontrado.');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Erro ao acessar o usuário.');
+            console.error(error);
+        }
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Meu Perfil</Text>
+            <Text style={styles.title}>Atualizar Perfil</Text>
 
             <TouchableOpacity style={styles.photoContainer} onPress={pickImage}>
-                {photo ? (
-                    <Image source={{ uri: photo }} style={styles.profileImage} />
+                {foto ? (
+                    <Image source={{ uri: foto }} style={styles.profileImage} />
                 ) : (
                     <Text style={styles.photoText}>Selecionar Foto</Text>
                 )}
@@ -46,8 +134,8 @@ export default function UserProfile() {
             <TextInput
                 style={styles.input}
                 placeholder="Nome"
-                value={name}
-                onChangeText={setName}
+                value={nome}
+                onChangeText={setNome}
             />
 
             <TextInput
@@ -61,54 +149,55 @@ export default function UserProfile() {
             <TextInput
                 style={styles.input}
                 placeholder="Senha"
-                value={password}
-                onChangeText={setPassword}
+                value={senha}
+                onChangeText={setSenha}
                 secureTextEntry={true}
             />
 
             <TextInput
                 style={styles.input}
-                placeholder="Data de Nascimento"
-                value={birthdate}
-                onChangeText={setBirthdate}
+                placeholder="Data de Nascimento (DD/MM/YYYY)"
+                value={dataNascimento}
+                onChangeText={handleDataNascimentoChange}
                 keyboardType="numeric"
             />
 
-            <TouchableOpacity style={styles.button} onPress={saveProfile}>
-                <Text style={styles.buttonText}>Salvar Alterações</Text>
+            <TouchableOpacity style={styles.button} onPress={handleUpdateProfile}>
+                <Text style={styles.buttonText}>Atualizar Perfil</Text>
             </TouchableOpacity>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#f9f9f9',
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         color: '#333',
-        marginTop: 40,
-        marginBottom: 20,
+        textAlign: 'center',
+        marginBottom: 30,
     },
     input: {
         height: 50,
         borderColor: '#ccc',
         borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 10,
-        marginVertical: 10,
+        borderRadius: 10,
+        paddingHorizontal: 15,
+        marginVertical: 15,
         fontSize: 16,
+        backgroundColor: '#fff',
     },
     button: {
         backgroundColor: '#5271FF',
-        paddingVertical: 12,
-        borderRadius: 8,
+        paddingVertical: 14,
+        borderRadius: 10,
         alignItems: 'center',
-        marginVertical: 15,
+        marginVertical: 25,
     },
     buttonText: {
         color: '#fff',
@@ -116,22 +205,26 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     photoContainer: {
-        width: 100,
-        height: 100,
+        width: 120,
+        height: 120,
         backgroundColor: '#f0f0f0',
-        borderRadius: 50,
+        borderRadius: 60,
         justifyContent: 'center',
         alignItems: 'center',
         marginVertical: 20,
+        borderWidth: 2,
+        borderColor: '#ddd',
     },
     profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 120,
+        height: 120,
+        borderRadius: 60,
     },
     photoText: {
-        color: '#666',
+        color: '#888',
         fontSize: 14,
         fontWeight: 'bold',
     },
 });
+
+export default UpdateProfile;

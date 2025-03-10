@@ -1,42 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Modal, Alert, Image } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-
-const professionals = [
-    { id: '1', name: 'Dr. João', specialty: 'Psicologia', price: 150, image: 'https://via.placeholder.com/100' },
-    { id: '2', name: 'Dra. Maria', specialty: 'Psiquiatria', price: 200, image: 'https://via.placeholder.com/100' },
-    { id: '3', name: 'Dr. Pedro', specialty: 'Psicologia', price: 180, image: 'https://via.placeholder.com/100' },
-    { id: '4', name: 'Dra. Ana', specialty: 'Psicologia', price: 220, image: 'https://via.placeholder.com/100' },
-    { id: '5', name: 'Dr. Carlos', specialty: 'Psiquiatria', price: 250, image: 'https://via.placeholder.com/100' },
-];
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_KEY_PROFISSIONAIS, API_KEY_AGENDAMENTOS } from '../../config.json';
 
 export default function SearchProfessionals() {
     const [name, setName] = useState('');
     const [specialty, setSpecialty] = useState('');
-    const [maxPrice, setMaxPrice] = useState('');
-    const [filteredProfessionals, setFilteredProfessionals] = useState(professionals);
+    const [price, setPrice] = useState('');
+    const [filteredProfessionals, setFilteredProfessionals] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedProfessional, setSelectedProfessional] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedTime, setSelectedTime] = useState(null);
+    const [userId, setUserId] = useState(null);
+
+    useEffect(() => {
+        const loadUserId = async () => {
+            try {
+                const storedUserId = await AsyncStorage.getItem('userId');
+                if (storedUserId !== null) {
+                    setUserId(storedUserId);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar o ID do usuário:', error);
+            }
+        };
+
+        loadUserId();
+    }, []);
+
+    useEffect(() => {
+        fetch(API_KEY_PROFISSIONAIS)
+            .then((response) => response.json())
+            .then((data) => {
+                setFilteredProfessionals(data);
+            })
+            .catch((error) => console.error('Erro ao carregar profissionais:', error));
+    }, []);
 
     const handleSearch = () => {
-        let filtered = professionals;
+        let filtered = filteredProfessionals;
 
         if (name) {
             filtered = filtered.filter((professional) =>
-                professional.name.toLowerCase().includes(name.toLowerCase())
+                professional.nome.toLowerCase().includes(name.toLowerCase())
             );
         }
 
         if (specialty) {
             filtered = filtered.filter((professional) =>
-                professional.specialty.toLowerCase().includes(specialty.toLowerCase())
+                professional.especialidade.toLowerCase().includes(specialty.toLowerCase())
             );
         }
 
-        if (maxPrice) {
-            filtered = filtered.filter((professional) => professional.price <= parseInt(maxPrice, 10));
+        if (price) {
+            filtered = filtered.filter((professional) => {
+                const professionalPrice = parseFloat(professional.preco);
+                const maxPrice = parseFloat(price);
+                return professionalPrice <= maxPrice;
+            });
         }
 
         setFilteredProfessionals(filtered);
@@ -45,8 +68,10 @@ export default function SearchProfessionals() {
     const clearFilters = () => {
         setName('');
         setSpecialty('');
-        setMaxPrice('');
-        setFilteredProfessionals(professionals);
+        setPrice('');
+        fetch(API_KEY_PROFISSIONAIS)
+            .then((response) => response.json())
+            .then((data) => setFilteredProfessionals(data));
     };
 
     const openModal = (professional) => {
@@ -54,12 +79,38 @@ export default function SearchProfessionals() {
         setModalVisible(true);
     };
 
-    const handleAgendarConsulta = () => {
+    const handleAgendarConsulta = async () => {
         if (!selectedDate || !selectedTime) {
             Alert.alert('Erro', 'Por favor, escolha a data e o horário para agendar.');
             return;
         }
-        Alert.alert('Sucesso', 'Consulta agendada com sucesso!');
+
+        try {
+            const response = await fetch(API_KEY_AGENDAMENTOS, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    paciente_id: userId,
+                    profissional_id: selectedProfessional.id,
+                    data_agendamento: selectedDate,
+                    horario: selectedTime,
+                    status: 'agendado',
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                Alert.alert('Sucesso', 'Consulta agendada com sucesso!');
+            } else {
+                Alert.alert('Erro', 'Falha ao agendar consulta');
+            }
+        } catch (error) {
+            console.error('Erro ao agendar consulta:', error);
+            Alert.alert('Erro', 'Erro ao agendar consulta');
+        }
+
         setModalVisible(false);
     };
 
@@ -83,10 +134,10 @@ export default function SearchProfessionals() {
 
             <TextInput
                 style={styles.input}
-                placeholder="Preço até"
+                placeholder="Preço máximo"
+                value={price}
+                onChangeText={setPrice}
                 keyboardType="numeric"
-                value={maxPrice}
-                onChangeText={setMaxPrice}
             />
 
             <TouchableOpacity style={styles.button} onPress={handleSearch}>
@@ -99,12 +150,15 @@ export default function SearchProfessionals() {
 
             <FlatList
                 data={filteredProfessionals}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.registro_profissional.toString()}
                 renderItem={({ item }) => (
                     <TouchableOpacity onPress={() => openModal(item)} style={styles.professionalCard}>
-                        <Text style={styles.professionalName}>{item.name}</Text>
-                        <Text style={styles.professionalSpecialty}>{item.specialty}</Text>
-                        <Text style={styles.professionalPrice}>R$ {item.price}</Text>
+                        <Image
+                            source={{ uri: item.foto }}
+                            style={styles.professionalImage}
+                        />
+                        <Text style={styles.professionalName}>{item.nome} </Text>
+                        <Text style={styles.professionalSpecialty}>{item.especialidade}</Text>
                     </TouchableOpacity>
                 )}
                 ListEmptyComponent={<Text style={styles.noResults}>Nenhum profissional encontrado</Text>}
@@ -120,14 +174,14 @@ export default function SearchProfessionals() {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Image
-                                source={{ uri: selectedProfessional.image }}
+                                source={{ uri: selectedProfessional.foto }}
                                 style={styles.modalImage}
                             />
 
-                            <Text style={styles.modalName}>{selectedProfessional.name}</Text>
-                            <Text style={styles.modalSpecialty}>{selectedProfessional.specialty}</Text>
-                            <Text style={styles.modalPrice}>R$ {selectedProfessional.price}</Text>
-                            <Text style={styles.modalDescription}>Descrição do profissional...</Text>
+                            <Text style={styles.modalName}>{selectedProfessional.nome}</Text>
+                            <Text style={styles.modalSpecialty}>{selectedProfessional.especialidade}</Text>
+                            <Text style={styles.modalDescription}>{selectedProfessional.descricao}</Text>
+                            <Text style={styles.modalPrice}>Preço por hora: R$ {selectedProfessional.preco}</Text>
                             <View style={styles.calendarContainer}>
                                 <Text style={styles.text}>Escolha a data:</Text>
                                 <Calendar
@@ -203,6 +257,14 @@ const styles = StyleSheet.create({
         padding: 15,
         marginVertical: 10,
         borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    professionalImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 15,
     },
     professionalName: {
         fontSize: 18,
@@ -214,8 +276,8 @@ const styles = StyleSheet.create({
     },
     professionalPrice: {
         fontSize: 16,
-        fontWeight: 'bold',
-        color: '#5271FF',
+        color: '#333',
+        marginTop: 5,
     },
     noResults: {
         fontSize: 16,
@@ -252,16 +314,15 @@ const styles = StyleSheet.create({
         color: '#777',
         marginBottom: 10,
     },
-    modalPrice: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#5271FF',
-        marginBottom: 20,
-    },
     modalDescription: {
         fontSize: 16,
         textAlign: 'center',
         marginBottom: 10,
+    },
+    modalPrice: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 10,
     },
     calendarContainer: {
         marginTop: 20,

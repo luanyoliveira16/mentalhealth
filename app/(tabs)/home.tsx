@@ -1,30 +1,93 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { API_KEY_USUARIOS, API_KEY_PROFISSIONAIS } from '../../config.json';
 
 export default function HomeScreen() {
     const router = useRouter();
     const [userName, setUserName] = useState('');
+    const [userImage, setUserImage] = useState('');
+    const [professionals, setProfessionals] = useState([]);
 
-    useEffect(() => {
-        setUserName('Ana Paula');
-    }, []);
+    const handleAgendar = () => {
+        router.push('(tabs)/search');
+    };
+    const fetchUserData = async () => {
+        try {
+            const userId = await AsyncStorage.getItem('userId');
+            if (!userId) {
+                Alert.alert('Erro', 'Usuário não encontrado. Faça o login novamente.');
+                return;
+            }
+
+            const response = await fetch(`${API_KEY_USUARIOS}/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const responseJson = await response.json();
+            if (response.ok) {
+                setUserName(responseJson.nome);
+                setUserImage(responseJson.foto);
+            } else {
+                Alert.alert('Erro', responseJson.message || 'Falha ao carregar dados do usuário');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Erro ao pegar dados do usuário');
+            console.error(error);
+        }
+    };
+
+    const fetchProfessionals = async () => {
+        try {
+            const response = await fetch(API_KEY_PROFISSIONAIS, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const responseJson = await response.json();
+            if (response.ok) {
+                setProfessionals(responseJson);
+            } else {
+                Alert.alert('Erro', responseJson.message || 'Falha ao carregar profissionais');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Erro ao pegar dados dos profissionais');
+            console.error(error);
+        }
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchUserData();
+            fetchProfessionals();
+        }, [])
+    );
+
+    const renderItem = ({ item }) => (
+        <View style={styles.professional}>
+            <Image
+                source={{ uri: item.foto }}
+                style={styles.professionalImage}
+            />
+            <Text style={styles.professionalName}>{item.nome}</Text>
+        </View>
+    );
 
     return (
         <View style={styles.mainContainer}>
-            <View style={styles.header}>
-            </View>
+            <View style={styles.header}></View>
 
             <Image
-                source={{ uri: '' }}
+                source={{ uri: userImage || '' }}
                 style={styles.userImage}
             />
-
-            {/* Circular Button */}
-            <TouchableOpacity style={styles.circularButton}>
-                <MaterialIcons name="add" size={30} color="white" />
-            </TouchableOpacity>
 
             {/* Olá, Nome */}
             <Text style={styles.greeting}>Olá, {userName}</Text>
@@ -35,37 +98,22 @@ export default function HomeScreen() {
                 <Text style={styles.infoText}>Estamos aqui para o que você precisar</Text>
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/agendar')}>
+            <TouchableOpacity style={styles.button} onPress={handleAgendar}>
                 <Text style={styles.buttonText}>Agendar Consulta</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/historico')}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('(tabs)/agenda')}>
                 <Text style={styles.buttonText}>Histórico de Consultas</Text>
             </TouchableOpacity>
 
             <Text style={styles.sectionTitle}>Profissionais</Text>
-            <View style={styles.sliderContainer}>
-                <View style={styles.professional}>
-                    <Image
-                        source={{ uri: 'https://via.placeholder.com/100' }}
-                        style={styles.professionalImage}
-                    />
-                    <Text style={styles.professionalName}>Dr. João</Text>
-                </View>
-                <View style={styles.professional}>
-                    <Image
-                        source={{ uri: 'https://via.placeholder.com/100' }}
-                        style={styles.professionalImage}
-                    />
-                    <Text style={styles.professionalName}>Dra. Maria</Text>
-                </View>
-                <View style={styles.professional}>
-                    <Image
-                        source={{ uri: 'https://via.placeholder.com/100' }}
-                        style={styles.professionalImage}
-                    />
-                    <Text style={styles.professionalName}>Dr. Pedro</Text>
-                </View>
-            </View>
+            <FlatList
+                data={professionals}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => index.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.sliderContainer}
+            />
         </View>
     );
 }
@@ -90,17 +138,6 @@ const styles = StyleSheet.create({
         borderRadius: 90,
         borderWidth: 3,
         borderColor: '#5271FF',
-    },
-    circularButton: {
-        position: 'absolute',
-        bottom: 100,
-        right: 20,
-        backgroundColor: '#5271FF',
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     greeting: {
         fontSize: 24,

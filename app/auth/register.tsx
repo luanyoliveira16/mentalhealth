@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { API_KEY_USUARIOS, API_KEY_FOTOS } from '../../config.json';
 
 const Register: React.FC = () => {
     const [nome, setNome] = useState('');
@@ -46,7 +47,7 @@ const Register: React.FC = () => {
         }
 
         try {
-            const response = await fetch('https://mentalhealth-ebon.vercel.app/api/usuarios', {
+            const response = await fetch(API_KEY_USUARIOS, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,12 +65,11 @@ const Register: React.FC = () => {
             const responseJson = await response.json();
             console.log('Resposta da API:', responseJson);
 
-            // Acessando o id corretamente
             const userId = responseJson.usuarios?.[0]?.id;
 
             if (userId) {
                 Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-                await uploadPhoto(userId);  // Passando o userId para o upload da foto
+                await uploadPhoto(userId);
             } else {
                 Alert.alert('Erro', responseJson.message || 'Erro ao criar usuário');
             }
@@ -92,7 +92,7 @@ const Register: React.FC = () => {
 
             formData.append('image', { uri: localUri, name: filename, type });
 
-            const imgbbUrl = `https://api.imgbb.com/1/upload?key=79c6c4ec0138fdd1c2054fcab43bcf77`;
+            const imgbbUrl = API_KEY_FOTOS;
 
             const imgbbResponse = await fetch(imgbbUrl, {
                 method: 'POST',
@@ -115,7 +115,7 @@ const Register: React.FC = () => {
 
     const updateUserWithPhoto = async (userId: string, imageUrl: string) => {
         try {
-            const response = await fetch(`https://mentalhealth-ebon.vercel.app/api/usuarios/${userId}`, {
+            const response = await fetch(`${API_KEY_USUARIOS}/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

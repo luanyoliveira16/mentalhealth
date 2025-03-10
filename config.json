@@ -1,0 +1,6 @@
+{
+  "API_KEY_USUARIOS": "https://mentalhealth-ebon.vercel.app/api/usuarios",
+  "API_KEY_AGENDAMENTOS": "https://mentalhealth-ebon.vercel.app/api/agendamentos",
+  "API_KEY_PROFISSIONAIS": "https://mentalhealth-ebon.vercel.app/api/profissionais",
+  "API_KEY_FOTOS": "https://api.imgbb.com/1/upload?key=79c6c4ec0138fdd1c2054fcab43bcf77"
+}
