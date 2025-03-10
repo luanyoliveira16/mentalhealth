@@ -1,50 +1,58 @@
-# Welcome to your Expo app 👋
+# Projeto Mental Health 
+- Trabalho do quarto período do curso de Análise e Desenvolvimento de Sistemas do SENAC.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este projeto foi desenvolvido para criar uma plataforma de agendamento de consultas com profissionais, permitindo que os usuários se cadastrem, façam login, recuperem senha, busquem profissionais por filtros e agendem consultas de forma intuitiva. O backend também foi desenvolvido de forma independente utilizando **Node.js** com autenticação **JWT** e envio de e-mails via **STMP**. O deploy foi realizado na **Vercel**.
 
-## Get started
 
-1. Install dependencies
+## Tecnologias Utilizadas
 
-   ```bash
-   npm install
-   ```
+### Frontend
+- **React Native**: Framework para desenvolvimento de aplicativos móveis.
+- **Canvas**: Para criação do protótipo inicial.
+- **React Navigation**: Para navegação entre as telas do aplicativo.
+- **Expo**: Para desenvolvimento e deploy de aplicativos React Native de maneira rápida.
 
-2. Start the app
+### Backend
+- **Node.js**: Utilizado para o desenvolvimento do backend da aplicação.
+- **JWT (JSON Web Token)**: Para autenticação segura dos usuários.
+- **Nodemailer (STMP)**: Para envio de e-mails, incluindo recuperação de senha.
+- **Vercel**: Para deploy do backend e frontend.
 
-   ```bash
-    npx expo start
-   ```
+## Funcionalidades
 
-In the output, you'll find options to open the app in a
+### 1. **Tela de Login**
+- O usuário pode fazer login utilizando seu e-mail e senha.
+- Caso o usuário tenha esquecido a senha, ele pode recuperar o acesso através de um processo de verificação via e-mail.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 2. **Tela de Cadastro**
+- O usuário pode criar uma conta fornecendo informações como nome, e-mail e senha.
+- Após o cadastro, o usuário pode acessar sua conta com as credenciais criadas.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 3. **Tela de Recuperação de Senha**
+- Caso o usuário esqueça sua senha, ele pode solicitar um token para redefinir a senha através de seu e-mail.
 
-## Get a fresh project
+### 4. **Tela de Busca e Agendamento**
+- O usuário pode buscar por profissionais utilizando filtros como nome, especialidade ou preço por hora.
+- Ao clicar no profissional desejado, um modal exibirá informações adicionais sobre o profissional, além de um calendário para agendamento de consulta.
 
-When you're ready, run:
+### 5. **Tela de Perfil**
+- O usuário pode atualizar suas informações pessoais diretamente no perfil.
 
-```bash
-npm run reset-project
-```
+### 6. **Tela de Histórico de Consultas**
+- O usuário pode visualizar um histórico de consultas realizadas, com detalhes de cada uma.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Funcionalidades Técnicas
 
-## Learn more
+- **Desenvolvimento Autônomo**: Todo o desenvolvimento foi feito de forma independente, incluindo a criação do protótipo no **Canvas**, o desenvolvimento do frontend em **React Native** e a construção do backend em **Node.js** com autenticação JWT.
+- **Envio de E-mails**: O envio de e-mails, como a recuperação de senha, é feito via **Nodemailer** utilizando o protocolo **STMP**.
+- **Deploy**: A aplicação foi disponibilizada para testes através do **Expo** (frontend) e o backend foi implementado e deployado na **Vercel**, garantindo que todas as funcionalidades estejam funcionando corretamente em um ambiente real.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Como Rodar o Projeto
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Pré-requisitos
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Node.js**: Instale o Node.js na sua máquina.
+- **Expo CLI**: Instale o Expo CLI globalmente com o seguinte comando:
+  ```bash
+  npm install install
+  npx expo start

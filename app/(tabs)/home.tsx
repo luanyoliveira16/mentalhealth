@@ -12,7 +12,7 @@ export default function HomeScreen() {
     const [professionals, setProfessionals] = useState([]);
 
     const handleAgendar = () => {
-        router.push('(tabs)/search');
+        router.push('(tabs)/busca');
     };
     const fetchUserData = async () => {
         try {
