@@ -174,12 +174,13 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: '#f9f9f9',
+        marginTop: 40
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         color: '#333',
-        textAlign: 'center',
+        textAlign: 'left',
         marginBottom: 30,
     },
     input: {

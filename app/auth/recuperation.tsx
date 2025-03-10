@@ -1,63 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { API_KEY_USUARIOS } from '../../config.json';
+import { useRouter } from 'expo-router';
+
 
 export default function ForgotPassword() {
+    const router = useRouter();
+
     const [email, setEmail] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
-    const [showInputs, setShowInputs] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
     const [isCodeSent, setIsCodeSent] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
 
-    const handleForgotPassword = () => {
+    const handleForgotPassword = async () => {
         if (!email) {
             Alert.alert('Erro', 'Por favor, informe seu e-mail.');
             return;
         }
-
-        setIsCodeSent(true);
-        setShowInputs(true);
-        setTimeout(() => {
-            Alert.alert('Sucesso', 'Um código de verificação foi enviado para o seu e-mail.');
-        }, 1000);
+        try {
+            const response = await fetch(`${API_KEY_USUARIOS}/request-password-change`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setIsCodeSent(true);
+                Alert.alert('Sucesso', 'Um código de verificação foi enviado para o seu e-mail.');
+            } else {
+                Alert.alert('Erro', data.message || 'Falha ao enviar código.');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Falha ao conectar ao servidor.');
+        }
     };
 
-    const handleVerifyCode = () => {
+    const handleVerifyCode = async () => {
         if (!verificationCode) {
             Alert.alert('Erro', 'Por favor, informe o código de verificação.');
             return;
         }
-
+        setIsVerified(true);
         Alert.alert('Sucesso', 'Código verificado. Agora você pode redefinir sua senha!');
-        setEmail('');
-        setVerificationCode('');
-        setShowInputs(false);
-        setIsCodeSent(false);
     };
 
-    useEffect(() => {
-        setTimeout(() => setShowInputs(true), 3000);
-    }, []);
+    const handleResetPassword = async () => {
+        if (!newPassword) {
+            Alert.alert('Erro', 'Por favor, informe a nova senha.');
+            return;
+        }
+        try {
+            const response = await fetch(`${API_KEY_USUARIOS}/verify-token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: verificationCode, novaSenha: newPassword })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                Alert.alert('Sucesso', 'Senha redefinida com sucesso!');
+                setEmail('');
+                setVerificationCode('');
+                setNewPassword('');
+                setIsCodeSent(false);
+                setIsVerified(false);
+            } else {
+                Alert.alert('Erro', data.message || 'Falha ao redefinir senha.');
+            }
+        } catch (error) {
+            Alert.alert('Erro', 'Falha ao conectar ao servidor.');
+        }
+    };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Esqueci minha senha</Text>
-
             {!isCodeSent && (
-                <TextInput
-                    style={styles.input}
-                    placeholder="Digite seu e-mail"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                />
+                <>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Digite seu e-mail"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                    />
+                    <TouchableOpacity style={styles.button} onPress={handleForgotPassword}>
+                        <Text style={styles.buttonText}>Enviar Código</Text>
+                    </TouchableOpacity>
+                </>
             )}
-
-            {!isCodeSent && (
-                <TouchableOpacity style={styles.button} onPress={handleForgotPassword}>
-                    <Text style={styles.buttonText}>Enviar Link de Redefinição</Text>
-                </TouchableOpacity>
-            )}
-
-            {showInputs && isCodeSent && (
+            {isCodeSent && !isVerified && (
                 <>
                     <TextInput
                         style={styles.input}
@@ -71,8 +103,21 @@ export default function ForgotPassword() {
                     </TouchableOpacity>
                 </>
             )}
-
-            <TouchableOpacity style={styles.backToLogin} onPress={() => Alert.alert('Redirecionando', 'Voltando para a tela de login')}>
+            {isVerified && (
+                <>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Digite sua nova senha"
+                        value={newPassword}
+                        onChangeText={setNewPassword}
+                        secureTextEntry
+                    />
+                    <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
+                        <Text style={styles.buttonText}>Redefinir Senha</Text>
+                    </TouchableOpacity>
+                </>
+            )}
+            <TouchableOpacity style={styles.backToLogin} onPress={() => router.push('auth/login')}>
                 <Text style={styles.backToLoginText}>Voltar ao login</Text>
             </TouchableOpacity>
         </View>
@@ -82,7 +127,7 @@ export default function ForgotPassword() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center', //
+        justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#f9f9f9',
         padding: 20,

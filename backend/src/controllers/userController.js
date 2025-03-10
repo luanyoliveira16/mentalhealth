@@ -1,6 +1,9 @@
 import Usuario from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import dotenv from "dotenv";
+
+dotenv.config()
 
 export const createUsuario = async (req, res) => {
     try {
@@ -126,8 +129,8 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: 'mentalhealthcontato@gmail.com',
-        pass: 'taxp dvlx dags kkxi',
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_USER,
     },
 });
 

@@ -95,45 +95,46 @@ export default function Agenda() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Minhas Consultas</Text>
-
-            {loading ? (
-                <Text style={styles.loading}>Carregando...</Text>
-            ) : (
-                agendadas.length === 0 && realizadas.length === 0 && canceladas.length === 0 ? (
-                    <Text style={styles.noConsultations}>Nenhuma consulta encontrada.</Text>
+            <View style={{ marginTop: 80 }}>
+                {loading ? (
+                    <Text style={styles.loading}>Carregando...</Text>
                 ) : (
-                    ['agendadas', 'realizadas', 'canceladas'].map((status) => (
-                        { agendadas, realizadas, canceladas }[status].length > 0 && (
-                            <View key={status} style={styles.section}>
-                                <Text style={styles.sectionTitle}>{status.charAt(0).toUpperCase() + status.slice(1)}</Text>
-                                <FlatList
-                                    data={{ agendadas, realizadas, canceladas }[status]}
-                                    keyExtractor={(item) => item.id.toString()}
-                                    renderItem={({ item }) => (
-                                        <View style={styles.card}>
-                                            <Text style={styles.cardText}>Profissional: {item.profissionalNome}</Text>
-                                            <Text style={styles.cardText}>Data: {formatDate(item.data_agendamento)}</Text>
-                                            <Text style={styles.cardText}>Horário: {item.horario}</Text>
-                                            {status === 'agendadas' && (
-                                                <TouchableOpacity style={styles.button} onPress={() => handleCancelConsultation(item.id)}>
-                                                    <Text style={styles.buttonText}>Cancelar</Text>
-                                                </TouchableOpacity>
+                    agendadas.length === 0 && realizadas.length === 0 && canceladas.length === 0 ? (
+                        <Text style={styles.noConsultations}>Nenhuma consulta encontrada.</Text>
+                    ) : (
+                        Object.entries({ agendadas, realizadas, canceladas }).map(([status, list]) =>
+                                list.length > 0 && (
+                                    <View key={status} style={styles.section}>
+                                        <Text style={styles.sectionTitle}>{status.charAt(0).toUpperCase() + status.slice(1)}</Text>
+                                        <FlatList
+                                            data={list}
+                                            keyExtractor={(item) => item.id.toString()}
+                                            renderItem={({ item }) => (
+                                                <View style={styles.card}>
+                                                    <Text style={styles.cardText}>Profissional: {item.profissionalNome}</Text>
+                                                    <Text style={styles.cardText}>Data: {formatDate(item.data_agendamento)}</Text>
+                                                    <Text style={styles.cardText}>Horário: {item.horario}</Text>
+                                                    {status === 'agendadas' && (
+                                                        <TouchableOpacity style={styles.button} onPress={() => handleCancelConsultation(item.id)}>
+                                                            <Text style={styles.buttonText}>Cancelar</Text>
+                                                        </TouchableOpacity>
+                                                    )}
+                                                </View>
                                             )}
-                                        </View>
-                                    )}
-                                />
-                            </View>
+                                        />
+                                    </View>
+                                )
                         )
-                    ))
-                )
-            )}
+                    )
+                )}
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20, backgroundColor: '#f7f9fc' },
-    title: { fontSize: 28, fontWeight: 'bold', color: '#333', textAlign: 'center', marginBottom: 20 },
+    container: { flex: 1, padding: 20, backgroundColor: '#f7f9fc', marginTop:40 },
+    title: { fontSize: 28, fontWeight: 'bold', color: '#333', textAlign: 'left', marginTop: 30},
     loading: { fontSize: 18, textAlign: 'center', marginTop: 20 },
     section: { marginBottom: 20 },
     sectionTitle: { fontSize: 22, fontWeight: 'bold', color: '#5271FF', marginBottom: 10 },

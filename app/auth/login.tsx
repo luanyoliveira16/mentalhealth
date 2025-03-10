@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_KEY_USUARIOS } from "../../config.json";
 
-
 export default function LoginScreen() {
     const router = useRouter();
 
@@ -32,7 +31,6 @@ export default function LoginScreen() {
 
             if (response.ok) {
                 const responseJson = await response.json();
-
                 const userId = responseJson.userId;
 
                 if (userId) {
@@ -60,56 +58,64 @@ export default function LoginScreen() {
     };
 
     return (
-        <View style={styles.mainContainer}>
-            <Text style={styles.logo}>mental health</Text>
+        <View style={styles.container}>
+            <View style={styles.formContainer}>
+                <Text style={styles.logo}>mental health</Text>
 
-            <View style={styles.inputContainer}>
-                <MaterialIcons name="email" size={24} color="gray" style={styles.icon} />
-                <TextInput
-                    placeholder="Email"
-                    style={styles.input}
-                    keyboardType="email-address"
-                    value={email}
-                    onChangeText={setEmail}
-                />
+                <View style={styles.inputContainer}>
+                    <MaterialIcons name="email" size={24} color="gray" style={styles.icon} />
+                    <TextInput
+                        placeholder="Email"
+                        style={styles.input}
+                        keyboardType="email-address"
+                        value={email}
+                        onChangeText={setEmail}
+                    />
+                </View>
+
+                <View style={styles.inputContainer}>
+                    <MaterialIcons name="lock" size={24} color="gray" style={styles.icon} />
+                    <TextInput
+                        placeholder="Senha"
+                        style={styles.input}
+                        secureTextEntry
+                        value={senha}
+                        onChangeText={setSenha}
+                    />
+                </View>
+
+                <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                    <Text style={styles.loginText}>Login</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleRecuperation}>
+                    <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleRegister}>
+                    <Text style={styles.register}>Primeira vez? Cadastre-se</Text>
+                </TouchableOpacity>
             </View>
-
-            <View style={styles.inputContainer}>
-                <MaterialIcons name="lock" size={24} color="gray" style={styles.icon} />
-                <TextInput
-                    placeholder="Senha"
-                    style={styles.input}
-                    secureTextEntry
-                    value={senha}
-                    onChangeText={setSenha}
-                />
-            </View>
-
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                <Text style={styles.loginText}>Login</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={handleRecuperation}>
-                <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={handleRegister}>
-                <Text style={styles.register}>Primeira vez? Cadastre-se</Text>
-            </TouchableOpacity>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    mainContainer: {
+    container: {
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         backgroundColor: '#fff',
+    },
+    formContainer: {
+        width: '80%',
+        alignItems: 'center',
     },
     logo: {
         fontSize: 40,
         fontWeight: 'bold',
         color: '#5271FF',
-        marginVertical: 30,
+        marginBottom: 30,
         textAlign: 'center',
     },
     inputContainer: {
