@@ -2,10 +2,10 @@ import Usuario from '../models/userModel.js';
 
 export const createUsuario = async (req, res) => {
     try {
-        const usuarios = req.body;
+        let usuarios = req.body;
 
         if (!Array.isArray(usuarios)) {
-            return res.status(400).json({ message: "Os dados devem ser um array de usuários" });
+            usuarios = [usuarios];
         }
 
         usuarios.forEach(usuario => {
