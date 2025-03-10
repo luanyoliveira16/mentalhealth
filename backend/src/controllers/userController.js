@@ -130,11 +130,10 @@ const transporter = nodemailer.createTransport({
     secure: false,
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_USER,
+        pass: process.env.SENHA_APP,
     },
 });
 
-// Função para enviar o e-mail com o token
 const sendEmail = async (email, token) => {
     const mailOptions = {
         from: 'mentalhealthcontato@gmail.com',
