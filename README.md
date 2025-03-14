@@ -8,8 +8,7 @@ Este projeto foi desenvolvido para criar uma plataforma de agendamento de consul
 
 ### Frontend
 - **React Native**: Framework para desenvolvimento de aplicativos móveis.
-- **Canvas**: Para criação do protótipo inicial.
-- **React Navigation**: Para navegação entre as telas do aplicativo.
+- **Canva**: Para criação do protótipo inicial.
 - **Expo**: Para desenvolvimento e deploy de aplicativos React Native de maneira rápida.
 
 ### Backend
@@ -17,6 +16,7 @@ Este projeto foi desenvolvido para criar uma plataforma de agendamento de consul
 - **JWT (JSON Web Token)**: Para autenticação segura dos usuários.
 - **Nodemailer (STMP)**: Para envio de e-mails, incluindo recuperação de senha.
 - **Vercel**: Para deploy do backend e frontend.
+- **Hostinger**: Hospedagem do banco de dados.
 
 ## Funcionalidades
 
@@ -54,5 +54,5 @@ Este projeto foi desenvolvido para criar uma plataforma de agendamento de consul
 - **Node.js**: Instale o Node.js na sua máquina.
 - **Expo CLI**: Instale o Expo CLI globalmente com o seguinte comando:
   ```bash
-  npm install install
+  npm install
   npx expo start
