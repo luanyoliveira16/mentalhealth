@@ -41,6 +41,11 @@ Este projeto foi desenvolvido para criar uma plataforma de agendamento de consul
 ### 6. **Tela de Histórico de Consultas**
 - O usuário pode visualizar um histórico de consultas realizadas, com detalhes de cada uma.
 
+### Vídeo demonstrativo
+
+[![Assista ao vídeo](https://img.youtube.com/vi/CRSoot4omlM/0.jpg)](https://www.youtube.com/watch?v=CRSoot4omlM)
+
+
 ## Funcionalidades Técnicas
 
 - **Desenvolvimento Autônomo**: Todo o desenvolvimento foi feito de forma independente, incluindo a criação do protótipo no **Canvas**, o desenvolvimento do frontend em **React Native** e a construção do backend em **Node.js** com autenticação JWT.
