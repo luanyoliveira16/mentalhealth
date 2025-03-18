@@ -41,10 +41,6 @@ Este projeto foi desenvolvido para criar uma plataforma de agendamento de consul
 ### 6. **Tela de Histórico de Consultas**
 - O usuário pode visualizar um histórico de consultas realizadas, com detalhes de cada uma.
 
-### Vídeo demonstrativo
-
-[![Assista ao vídeo](https://img.youtube.com/vi/CRSoot4omlM/0.jpg)](https://www.youtube.com/watch?v=CRSoot4omlM)
-
 
 ## Funcionalidades Técnicas
 
